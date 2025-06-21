@@ -19,9 +19,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const corsOptions = {
-  origin: ["http://localhost:5173", "https://tabeebak-frontend.vercel.app"],
-  credentials: true,
-  optionsSuccessStatus: 200,
+  origin: [
+    "http://localhost:5173",
+    "https://tabeebak-frontend.vercel.app", // تأكد من عدم وجود / في النهاية
+  ],
+  credentials: true, // ضروري إذا كنت تستخدم cookies أو JWT
+  methods: ["GET", "POST", "PUT", "DELETE"], // السماح بالـ Methods المطلوبة
+  allowedHeaders: ["Content-Type", "Authorization"], // السماح بالـ Headers المطلوبة
 };
 
 app.use(cors(corsOptions));
