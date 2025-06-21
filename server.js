@@ -5,21 +5,18 @@ const morgan = require("morgan");
 const colors = require("colors");
 const connectDB = require("./config/db");
 
-// Connect to database
+// Connect to DB
 connectDB();
 
 const app = express();
 
-// Middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// CORS Configuration
+// Allowed Origins
 const allowedOrigins = [
   "http://localhost:5173",
   "https://tabeebak-frontend.vercel.app",
 ];
 
+// CORS Options
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -35,27 +32,36 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-// Enable CORS pre-flight
-app.options("*", cors(corsOptions));
+// Express Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// CORS Middleware
 app.use(cors(corsOptions));
 
-// Additional CORS headers middleware
+// Manual Headers (Extra Safety)
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Origin", origin);
   }
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header(
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, X-Requested-With"
   );
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Expose-Headers", "Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Expose-Headers", "Authorization");
+
+  // Handle preflight
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
   next();
 });
 
-// Logger
+// Logger (only in development)
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
@@ -77,15 +83,18 @@ app.use("/api/appointments", appointmentRoutes);
 
 // Health check
 app.get("/", (req, res) => {
-  res.status(200).json({ status: "OK", message: "Tabeebak Backend API" });
+  res
+    .status(200)
+    .json({ status: "OK", message: "Tabeebak Backend API Running" });
 });
 
-// Error handling
+// Global Error Handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error(err.stack.red);
   res.status(500).json({ error: "Internal Server Error" });
 });
 
+// Server Listener
 const PORT = process.env.PORT || 6000;
 const server = app.listen(PORT, () => {
   console.log(
@@ -93,6 +102,7 @@ const server = app.listen(PORT, () => {
   );
 });
 
+// Handle Unhandled Rejections
 process.on("unhandledRejection", (err, promise) => {
   console.log(`Error: ${err.message}`.red);
   server.close(() => process.exit(1));
