@@ -39,6 +39,10 @@ app.use("/api/appointments", appointmentRoutes);
 
 const PORT = process.env.PORT || 6000;
 
+app.get("/", (req, res) => {
+  res.send("Welcome to Tabeebak Backend API");
+});
+
 const server = app.listen(
   PORT,
   console.log(
@@ -50,3 +54,5 @@ process.on("unhandledRejection", (err, promise) => {
   console.log(`Error: ${err.message}`.red);
   server.close(() => process.exit(1));
 });
+
+module.exports = app; // هذا السطر ضروري لعمل Vercel
