@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const corsOptions = {
-  origin: ["http://localhost:5173", "https://tabeebak-frontend.vercel.app/"],
+  origin: ["http://localhost:5173", "https://tabeebak-frontend.vercel.app"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
